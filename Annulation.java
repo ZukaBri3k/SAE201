@@ -24,13 +24,10 @@ public class Annulation extends Application {
             + "   1 occupant\n" + "Chambre 403 : Chambre standard"
             + "   2 occupants");
     
-    public static void main(String[] args) {
-        launch(args);
-    }
 
     @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+    public void start(Stage stage) {
+        this.primaryStage = stage;
         Scene laScene;
         boutonSup.setPrefWidth(100);
         root.setPadding(new Insets(10));
@@ -47,7 +44,7 @@ public class Annulation extends Application {
             confirmer.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
                     confirmer.close();
-                    primaryStage.close();
+                    this.primaryStage.close();
                     ConfirmationPage();
                 } else {
                 	confirmer.close();
@@ -57,8 +54,12 @@ public class Annulation extends Application {
         });
 
         laScene = new Scene(root, 400, 300);
-        primaryStage.setScene(laScene);
-        primaryStage.show();
+        this.primaryStage.setScene(laScene);
+        AfficherAnnulation();
+    }
+    
+    private void AfficherAnnulation() {
+        this.primaryStage.show();
     }
 
     private void ConfirmationPage() {
@@ -79,5 +80,9 @@ public class Annulation extends Application {
         Scene confirmationScene = new Scene(confirmationRoot, 400, 300);
         confirmationStage.setScene(confirmationScene);
         confirmationStage.show();
+    }
+    
+    public static void main(String[] args) {
+        Application.launch(args);
     }
 }
