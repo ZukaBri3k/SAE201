@@ -12,15 +12,28 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class RecapModif extends Stage{
 	private GridPane root = new GridPane();
+	private VBox num_chambre = new VBox();
 	
 	private Label lblnumReserv = new Label("Numéro de reservation :");
 	private TextField txtReserv = new TextField();
 	
+	private Label lblNom = new Label("Nom :");
+	private TextField txtnom = new TextField();
+	private Label lblPrenom = new Label("Prenom :");
+	private TextField txtpren = new TextField();
+	private Label lblNum = new Label("Numéro de téléphone :");
+	private TextField txtNumTel = new TextField();
+	private Label lblNb = new Label("Nombre de personne :");
+	private TextField txtNbPer = new TextField();
+	
+	private Label lblNumCh = new Label("Numéro de(s) chambre(s) :");
+	private TextField txtNuCh = new TextField();
 	private Label lblnbCh = new Label("Nombre de chambre :");
 	private TextField txtCh = new TextField();
 	
@@ -28,11 +41,12 @@ public class RecapModif extends Stage{
 	private Label lbldateF = new Label("Date de fin :");
 
 	private DatePicker dateDebut = new DatePicker();
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy"); 
+	private LocalDate dateD;
+	private LocalDate dateF;
 	private DatePicker dateFin = new DatePicker();
 	
-	private Label lblChNonLib = new Label("Chambre non libre");
-	private Label lblChLib = new Label("Chambre libre");
+	private Label lblChLib = new Label("Chambre non libre");
+	private boolean estLibre;
 	
 	private Label lblnumPla = new Label("Nombre de place :");
 	private TextField txtPlace = new TextField();
@@ -40,12 +54,53 @@ public class RecapModif extends Stage{
 	private Label lblprix = new Label("Prix :");
 	private TextField txtprice = new TextField();
 	
-	private Label lblperArr = new Label("Personne pas encore arrivée");
-	
 	private Button bFermer = new Button("Fermer");
 	private Button bEnvoyer = new Button("Valider");
 	
-	public RecapModif(){
+	private ComboBox cbChambre = new ComboBox();
+	
+	public RecapModif(Reservation reserv){
+		
+		this.txtReserv.setText(String.valueOf(reserv.getNumero_reservation()));
+		this.txtnom.setText(reserv.getReserve().getNom());
+		this.txtpren.setText(reserv.getReserve().getPrenom());
+		this.txtNumTel.setText(reserv.getReserve().getNumero_tel());
+		this.txtNbPer.setText(String.valueOf(reserv.getNb_personne()));
+		
+		int total = 0;
+		int prixto = 0;
+		for (Chambre c : reserv.getListe_chambre()) {
+			this.txtNuCh.setText(String.valueOf(c.getNumChambre()));
+			this.num_chambre.getChildren().addAll(this.txtNuCh);
+			this.estLibre = c.isEstLibre();
+			total += c.getNbPlace();
+			this.txtPlace.setText(String.valueOf(total));
+			prixto += c.getPrix();
+			this.txtprice.setText(String.valueOf(prixto));
+		}
+		
+		this.txtCh.setText(String.valueOf(reserv.getNb_chambre()));
+		
+		this.dateD = reserv.getDate_debut();
+		this.dateF = reserv.getDate_fin();
+		this.dateDebut.setValue(dateD);
+		this.dateFin.setValue(dateF);
+		
+		cbChambre.getItems().addAll(
+				"Libre", 
+				"Pas libre"
+				);
+		
+		cbChambre.setOnAction(e -> {
+			if(cbChambre.getSelectionModel().getSelectedItem().equals("Libre")) {
+				lblChLib.setText("Chambre libre");
+				lblChLib.setTextFill(Color.GREEN);
+			} else {
+				lblChLib.setText("Chambre non libre");
+				lblChLib.setTextFill(Color.RED);
+			}
+		});
+		
 		this.setTitle("Récapitulatif de la réservation");
 		this.setResizable(false);
 		this.sizeToScene();
@@ -56,66 +111,32 @@ public class RecapModif extends Stage{
 	}
 	
 	private Parent creerContenu() {
-		boolean estLibre = false;
-		boolean estArrive = true;
-		
-		String reserv = "1";
-		txtReserv.setText(reserv);
-		
-		String chambre = "1";
-		txtCh.setText(chambre);
-		
-		String dd = "24/01/2004";
-	    LocalDate dateD = LocalDate.parse(dd, formatter);
-		dateDebut.setValue(dateD);
-		String df = "05/02/2004";
-		LocalDate dateF = LocalDate.parse(df, formatter);
-		dateFin.setValue(dateF);
 		
 		dateDebut.setShowWeekNumbers(false);
 		
 		lblChLib.setTextFill(Color.RED);
 		
-		String place = "4";
-		txtPlace.setText(place);
-		
-		String price = "400€";
-		txtprice.setText(price);
-		
-		lblperArr.setTextFill(Color.RED);
-		
 		root.addRow(0, lblnumReserv, txtReserv);
-		root.addRow(1, lblnbCh, txtCh);
-		root.addRow(2, lbldateD, dateDebut);
-		root.addRow(3, lbldateF, dateFin);
+		root.addRow(1, lblNom, txtnom);
+		root.addRow(2, lblPrenom, txtpren);
+		root.addRow(3, lblNum, txtNumTel);
+		root.addRow(4, lblNb, txtNbPer);
+		root.addRow(5, lblNumCh, num_chambre);
+		root.addRow(6, lblnbCh, txtCh);
+		root.addRow(7, lbldateD, dateDebut);
+		root.addRow(8, lbldateF, dateFin);
 		
-		final ComboBox cbChambre = new ComboBox();
-		cbChambre.getItems().addAll(
-				"Libre", 
-				"Pas libre"
-				);
-		
-		root.addRow(4, lblChLib, cbChambre);
+		root.addRow(9, lblChLib, cbChambre);
 		if(estLibre == true) {
 			lblChLib.setText("Chambre libre");
 			lblChLib.setTextFill(Color.GREEN);
 		}
-		root.addRow(5, lblnumPla, txtPlace);
-		root.addRow(6, lblprix, txtprice);
+		root.addRow(10, lblnumPla, txtPlace);
+		root.addRow(11, lblprix, txtprice);
 		
-		final ComboBox cbArrive = new ComboBox();
-		cbArrive.getItems().addAll(
-				"Arrivée", 
-				"Pas arrivée"
-				);
-		root.addRow(7, lblperArr, cbArrive);
-		if(estArrive == true) {
-			lblperArr.setText("Personne arrivée");
-			lblperArr.setTextFill(Color.GREEN);
-		}
 		
-		root.add(bFermer, 1, 8);
-		root.add(bEnvoyer, 0, 8);
+		root.add(bFermer, 1, 12);
+		root.add(bEnvoyer, 0, 12);
 		
 		GridPane.setHalignment(bFermer, HPos.RIGHT);
         GridPane.setValignment(bFermer, VPos.CENTER);
@@ -123,7 +144,7 @@ public class RecapModif extends Stage{
 		root.setHgap(10);
 		root.setVgap(10);
 		root.setPadding(new Insets(10));
-		//root.setGridLinesVisible(true);
+		
 		root.setStyle("-fx-font-size:13;");
 		return root;
 	}
