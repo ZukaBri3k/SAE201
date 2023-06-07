@@ -60,7 +60,7 @@ public class RecapModif extends Stage{
 	private ComboBox cbChambre = new ComboBox();
 	
 	public RecapModif(Reservation reserv){
-		
+		boolean paslibre = true;
 		this.txtReserv.setText(String.valueOf(reserv.getNumero_reservation()));
 		this.txtnom.setText(reserv.getReserve().getNom());
 		this.txtpren.setText(reserv.getReserve().getPrenom());
@@ -72,12 +72,15 @@ public class RecapModif extends Stage{
 		for (Chambre c : reserv.getListe_chambre()) {
 			this.txtNuCh.setText(String.valueOf(c.getNumChambre()));
 			this.num_chambre.getChildren().addAll(this.txtNuCh);
-			this.estLibre = c.isEstLibre();
+			if(c.isEstLibre() == false) {
+				paslibre = false;
+			}
 			total += c.getNbPlace();
 			this.txtPlace.setText(String.valueOf(total));
 			prixto += c.getPrix();
 			this.txtprice.setText(String.valueOf(prixto));
 		}
+		this.estLibre = paslibre;
 		
 		this.txtCh.setText(String.valueOf(reserv.getNb_chambre()));
 		
@@ -149,19 +152,3 @@ public class RecapModif extends Stage{
 		return root;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
