@@ -3,6 +3,7 @@ import java.time.format.DateTimeFormatter;
 
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -12,13 +13,16 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class RecapModif extends Stage{
 	private GridPane root = new GridPane();
-	private VBox num_chambre = new VBox();
+	private HBox num_chambre = new HBox();
+	private HBox hboxprix = new HBox();
+	private HBox hboxplace = new HBox();
 	
 	private Label lblnumReserv = new Label("Numéro de reservation :");
 	private TextField txtReserv = new TextField();
@@ -57,7 +61,7 @@ public class RecapModif extends Stage{
 	private Button bFermer = new Button("Fermer");
 	private Button bEnvoyer = new Button("Valider");
 	
-	private ComboBox cbChambre = new ComboBox();
+	private ComboBox<String> cbChambre = new ComboBox<String>();
 	
 	public RecapModif(Reservation reserv){
 		boolean paslibre = true;
@@ -67,18 +71,21 @@ public class RecapModif extends Stage{
 		this.txtNumTel.setText(reserv.getReserve().getNumero_tel());
 		this.txtNbPer.setText(String.valueOf(reserv.getNb_personne()));
 		
-		int total = 0;
-		int prixto = 0;
-		for (Chambre c : reserv.getListe_chambre()) {
-			this.txtNuCh.setText(String.valueOf(c.getNumChambre()));
-			this.num_chambre.getChildren().addAll(this.txtNuCh);
-			if(c.isEstLibre() == false) {
-				paslibre = false;
-			}
-			total += c.getNbPlace();
-			this.txtPlace.setText(String.valueOf(total));
-			prixto += c.getPrix();
-			this.txtprice.setText(String.valueOf(prixto));
+		for (int i = 0; i < reserv.getListe_chambre().size(); i++) {
+		    Chambre c = reserv.getListe_chambre().get(i);
+		    this.num_chambre.getChildren().add(new TextField(String.valueOf(c.getNumChambre())));
+		    
+
+		    if (c.isEstLibre() == false) {
+		        paslibre = false;
+		    }
+			this.hboxplace.getChildren().add(new TextField(String.valueOf(c.getNbPlace())));
+			this.hboxprix.getChildren().add(new TextField(String.valueOf(c.getPrix())));
+			if (i < reserv.getListe_chambre().size() - 1) {
+		        this.num_chambre.getChildren().add(new Label(";"));
+		        this.hboxplace.getChildren().add(new Label(";"));
+		        this.hboxprix.getChildren().add(new Label(";"));
+		    }
 		}
 		this.estLibre = paslibre;
 		
@@ -124,6 +131,7 @@ public class RecapModif extends Stage{
 		root.addRow(2, lblPrenom, txtpren);
 		root.addRow(3, lblNum, txtNumTel);
 		root.addRow(4, lblNb, txtNbPer);
+		lblNumCh.setAlignment(Pos.TOP_CENTER);
 		root.addRow(5, lblNumCh, num_chambre);
 		root.addRow(6, lblnbCh, txtCh);
 		root.addRow(7, lbldateD, dateDebut);
@@ -134,8 +142,8 @@ public class RecapModif extends Stage{
 			lblChLib.setText("Chambre libre");
 			lblChLib.setTextFill(Color.GREEN);
 		}
-		root.addRow(10, lblnumPla, txtPlace);
-		root.addRow(11, lblprix, txtprice);
+		root.addRow(10, lblnumPla, hboxplace);
+		root.addRow(11, lblprix, hboxprix);
 		
 		
 		root.add(bFermer, 1, 12);
