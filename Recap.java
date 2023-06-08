@@ -1,8 +1,7 @@
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -11,7 +10,7 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -19,7 +18,9 @@ import javafx.util.Callback;
 public class Recap extends Stage{
 	private GridPane root = new GridPane();
 	
-	private VBox num_chambre = new VBox();
+	private HBox num_chambre = new HBox();
+	private HBox hboxprix = new HBox();
+	private HBox hboxplace = new HBox();
 	
 	private Label lblnumReserv = new Label("Numéro de reservation :");
 	private Label lblReserv = new Label();
@@ -34,7 +35,6 @@ public class Recap extends Stage{
 	private Label lblNbPer = new Label();
 	
 	private Label lblNumCh = new Label("Numéro de(s) chambre(s) :");
-	private Label lblNuCh = new Label();
 	private Label lblnbCh = new Label("Nombre de chambre :");
 	private Label lblCh = new Label();
 	
@@ -68,18 +68,21 @@ public class Recap extends Stage{
 		this.lblNumTel.setText(reserv.getReserve().getNumero_tel());
 		this.lblNbPer.setText(String.valueOf(reserv.getNb_personne()));
 		
-		int total = 0;
-		int prixto = 0;
-		for (Chambre c : reserv.getListe_chambre()) {
-			this.lblNuCh.setText(String.valueOf(c.getNumChambre()));
-			this.num_chambre.getChildren().addAll(this.lblNuCh);
-			if(c.isEstLibre() == false) {
-				paslibre = false;
-			}
-			total += c.getNbPlace();
-			this.lblPlace.setText(String.valueOf(total));
-			prixto += c.getPrix();
-			this.lblprice.setText(String.valueOf(prixto));
+		for (int i = 0; i < reserv.getListe_chambre().size(); i++) {
+		    Chambre c = reserv.getListe_chambre().get(i);
+		    this.num_chambre.getChildren().add(new Label(String.valueOf(c.getNumChambre())));
+		    
+
+		    if (c.isEstLibre() == false) {
+		        paslibre = false;
+		    }
+			this.hboxplace.getChildren().add(new Label(String.valueOf(c.getNbPlace())));
+			this.hboxprix.getChildren().add(new Label(String.valueOf(c.getPrix())));
+			if (i < reserv.getListe_chambre().size() - 1) {
+		        this.num_chambre.getChildren().add(new Label(";"));
+		        this.hboxplace.getChildren().add(new Label(";"));
+		        this.hboxprix.getChildren().add(new Label(";"));
+		    }
 		}
 		
 		this.estLibre = paslibre;
@@ -137,6 +140,7 @@ public class Recap extends Stage{
 		root.addRow(2, lblPrenom, lblpren);
 		root.addRow(3, lblNum, lblNumTel);
 		root.addRow(4, lblNb, lblNbPer);
+		lblNumCh.setAlignment(Pos.CENTER);
 		root.addRow(5, lblNumCh, num_chambre);
 		root.addRow(6, lblnbCh, lblCh);
 		root.addRow(7, lbldateD, dateDebut);
@@ -145,8 +149,8 @@ public class Recap extends Stage{
 			lblChLib.setText("Chambre libre");
 			lblChLib.setTextFill(Color.GREEN);
 		}
-		root.addRow(9, lblnumPla, lblPlace);
-		root.addRow(10, lblprix, lblprice);
+		root.addRow(9, lblnumPla, this.hboxplace);
+		root.addRow(10, lblprix, this.hboxprix);
 		
 		root.add(bModifier, 0, 11);
 		root.add(bFermer, 1, 11);
@@ -165,19 +169,3 @@ public class Recap extends Stage{
 		return root;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
