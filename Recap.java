@@ -17,7 +17,7 @@ import javafx.util.Callback;
 
 public class Recap extends Stage{
 	private GridPane root = new GridPane();
-	
+	//Les HBox utile pour aligner les informations si il y'a plusieurs chambre
 	private HBox num_chambre = new HBox();
 	private HBox hboxprix = new HBox();
 	private HBox hboxplace = new HBox();
@@ -35,6 +35,7 @@ public class Recap extends Stage{
 	private Label lblNbPer = new Label();
 	
 	private Label lblNumCh = new Label("Numéro de(s) chambre(s) :");
+	private Label lblnumChambre = new Label("");
 	private Label lblnbCh = new Label("Nombre de chambre :");
 	private Label lblCh = new Label();
 	
@@ -61,30 +62,35 @@ public class Recap extends Stage{
 	
 	public Recap(Reservation reserv){
 		boolean paslibre = true;
+		//initialisation des textes avec les informations de la reservation
 		this.lblReserv.setText(String.valueOf(reserv.getNumero_reservation()));
 		
 		this.lblnom.setText(reserv.getReserve().getNom());
 		this.lblpren.setText(reserv.getReserve().getPrenom());
 		this.lblNumTel.setText(reserv.getReserve().getNumero_tel());
 		this.lblNbPer.setText(String.valueOf(reserv.getNb_personne()));
-		
+		lblnumChambre.setText(String.valueOf(reserv.getListe_chambre().get(0).getNumChambre()));
+		lblPlace.setText(String.valueOf(reserv.getListe_chambre().get(0).getNbPlace()));
+		lblprice.setText(String.valueOf(reserv.getListe_chambre().get(0).getPrix()));
+		//parcours de tableau pour récupérer les informations de la liste de chambre de la réservation
 		for (int i = 0; i < reserv.getListe_chambre().size(); i++) {
 		    Chambre c = reserv.getListe_chambre().get(i);
-		    this.num_chambre.getChildren().add(new Label(String.valueOf(c.getNumChambre())));
-		    
-
+		  //le if ici sert à savoir si une chambre dans la liste est pas libre alors la reservation n'est pas libre du tout
 		    if (c.isEstLibre() == false) {
 		        paslibre = false;
 		    }
-			this.hboxplace.getChildren().add(new Label(String.valueOf(c.getNbPlace())));
-			this.hboxprix.getChildren().add(new Label(String.valueOf(c.getPrix())));
-			if (i < reserv.getListe_chambre().size() - 1) {
-		        this.num_chambre.getChildren().add(new Label(";"));
-		        this.hboxplace.getChildren().add(new Label(";"));
-		        this.hboxprix.getChildren().add(new Label(";"));
+			//les séparateurs avec un ";" entre chaque données
+			if (i >= 1) {
+				lblnumChambre.setText(lblnumChambre.getText()+";"+c.getNumChambre());
+				lblPlace.setText(lblPlace.getText()+";"+c.getNbPlace());
+		        lblprice.setText(lblprice.getText()+";"+c.getPrix());
 		    }
 		}
-		
+		//hbox pour aligner les informations qui seront à modifier
+		this.hboxplace.getChildren().add(lblPlace);
+		this.hboxprix.getChildren().add(lblprice);
+		this.num_chambre.getChildren().add(lblnumChambre);
+				
 		this.estLibre = paslibre;
 		
 		this.lblCh.setText(String.valueOf(reserv.getNb_chambre()));
@@ -104,8 +110,9 @@ public class Recap extends Stage{
 	}
 	
 	private Parent creerContenu() {
+		//pour retirer le numéro des semaines sur le calendrier
 		dateDebut.setShowWeekNumbers(false);
-		
+		//C'est pour faire une séléction de date 
 		final Callback<DatePicker, DateCell> dayCellFactory =
 			    new Callback<DatePicker, DateCell>() {
 			        @Override
@@ -134,7 +141,7 @@ public class Recap extends Stage{
 			});
 		
 		lblChLib.setTextFill(Color.RED);
-		
+		//ajout des libelle et des textes ainsi que des hbox dans le gridpane
 		root.addRow(0, lblnumReserv, lblReserv);
 		root.addRow(1, lblNom, lblnom);
 		root.addRow(2, lblPrenom, lblpren);
