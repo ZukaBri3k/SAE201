@@ -112,6 +112,7 @@ public class Recap extends Stage{
 	private Parent creerContenu() {
 		//pour retirer le numéro des semaines sur le calendrier
 		dateDebut.setShowWeekNumbers(false);
+		dateFin.setShowWeekNumbers(false); 
 		//C'est pour faire une séléction de date 
 		final Callback<DatePicker, DateCell> dayCellFactory =
 			    new Callback<DatePicker, DateCell>() {
