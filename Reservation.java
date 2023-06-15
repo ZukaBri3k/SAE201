@@ -1,35 +1,42 @@
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
 
 public class Reservation {
 	private static int numero_reservation = 0;
+	private int idReservation;
 	private int nb_chambre;
-	private Date date_debut;
-	private Date date_fin;
+	private LocalDate date_debut;
+	private LocalDate date_fin;
 	private int nb_personne;
 	private ArrayList<Chambre> liste_chambre;
 	private boolean estValidee;
 	private Client reserve;
+	private boolean estValide;
 	
-	public Reservation(Date date_debut, Date date_fin, int nb_personne, Client c, Chambre ch) {
+	public Reservation(LocalDate date_debut, LocalDate date_fin, int nb_personne, Client c, Chambre ch) {
 		super();
 		this.date_debut = date_debut;
 		this.date_fin = date_fin;
 		this.nb_personne = nb_personne;
 		this.reserve = c;
 		this.liste_chambre = new ArrayList<Chambre>();
-		this.liste_chambre.add(ch);
+		this.addChambre(ch);
+		this.idReservation = Reservation.numero_reservation;
 		Reservation.numero_reservation++;
+		estValide = false;
 	}
 	
 	public void addChambre(Chambre c) {
 		this.liste_chambre.add(c);
+		this.nb_chambre++;
 	}
 	
 	public void delChambre(Chambre c) {
 		if(this.liste_chambre.contains(c)) {
 			this.liste_chambre.remove(c);
+			this.nb_chambre--;
 		}
 	}
 	
@@ -59,17 +66,16 @@ public class Reservation {
 	public static void main(String[] args) {
 		
 		Chambre ch = new Chambre(1, false, 2, 30.0);
-		Client c = new Client("Dumerchat", "Kyrill", "0613024751");
-		Hotel CB = new Hotel(new Reservation(new Date("01/07/2004"), new Date("03/07/2004"), 4, c, ch));
+		//Client c = new Client("Dumerchat", "Kyrill", "0613024751");
 		
 	}
 
-	public static int getNumero_reservation() {
-		return numero_reservation;
+	public int getNumero_reservation() {
+		return this.idReservation;
 	}
 
-	public static void setNumero_reservation(int numero_reservation) {
-		Reservation.numero_reservation = numero_reservation;
+	public void setNumero_reservation(int numero_reservation) {
+		this.idReservation = numero_reservation;
 	}
 
 	public int getNb_chambre() {
@@ -80,19 +86,19 @@ public class Reservation {
 		this.nb_chambre = nb_chambre;
 	}
 
-	public Date getDate_debut() {
+	public LocalDate getDate_debut() {
 		return date_debut;
 	}
 
-	public void setDate_debut(Date date_debut) {
+	public void setDate_debut(LocalDate date_debut) {
 		this.date_debut = date_debut;
 	}
 
-	public Date getDate_fin() {
+	public LocalDate getDate_fin() {
 		return date_fin;
 	}
 
-	public void setDate_fin(Date date_fin) {
+	public void setDate_fin(LocalDate date_fin) {
 		this.date_fin = date_fin;
 	}
 
@@ -112,14 +118,6 @@ public class Reservation {
 		this.liste_chambre = liste_chambre;
 	}
 
-	public boolean isEstValidee() {
-		return estValidee;
-	}
-
-	public void setEstValidee(boolean estValidee) {
-		this.estValidee = estValidee;
-	}
-
 	public Client getReserve() {
 		return reserve;
 	}
@@ -127,11 +125,17 @@ public class Reservation {
 	public void setReserve(Client reserve) {
 		this.reserve = reserve;
 	}
+	public boolean getEstValide() {
+		return estValide;
+	}
 
+	public void setEstValide(boolean estValide) {
+		this.estValide = estValide;
+	}
+
+	
 	@Override
 	public String toString() {
-		return "Reservation [nb_chambre=" + nb_chambre + ", date_debut=" + date_debut + ", date_fin=" + date_fin
-				+ ", nb_personne=" + nb_personne + ", liste_chambre=" + liste_chambre + ", estValidee=" + estValidee
-				+ ", reserve=" + reserve + "]";
+		return "Réservation n°" + this.idReservation + " | nom: " + this.getReserve().getNom() + " | numéro de téléphone: " + this.getReserve().getNumero_tel() + " | nombre de personne: " + this.nb_personne + " | nombre de chambre: " + this.getNb_chambre();
 	}
 }

@@ -1,26 +1,29 @@
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class Recap extends Stage{
 	private GridPane root = new GridPane();
-	//Les HBox utile pour aligner les informations si il y'a plusieurs chambre
-	private HBox num_chambre = new HBox();
-	private HBox hboxprix = new HBox();
-	private HBox hboxplace = new HBox();
+	
+	private VBox num_chambre = new VBox();
 	
 	private Label lblnumReserv = new Label("Numéro de reservation :");
 	private Label lblReserv = new Label();
@@ -35,7 +38,7 @@ public class Recap extends Stage{
 	private Label lblNbPer = new Label();
 	
 	private Label lblNumCh = new Label("Numéro de(s) chambre(s) :");
-	private Label lblnumChambre = new Label("");
+	private Label lblNuCh = new Label();
 	private Label lblnbCh = new Label("Nombre de chambre :");
 	private Label lblCh = new Label();
 	
@@ -55,43 +58,43 @@ public class Recap extends Stage{
 	private Label lblprix = new Label("Prix :");
 	private Label lblprice = new Label();
 	
+	private Label lblAdresseMail = new Label("Adresse mail :");
+	private Label lblMail = new Label();
+	
 	private Button bModifier = new Button("Modifier");
+	private Button bSupprimer = new Button("Supprimer");
 	private Button bFermer = new Button("Fermer");
 	private Button bEnvoyer = new Button("Valider");
 	
+	private Reservation reserv;
+	
 	
 	public Recap(Reservation reserv){
-		boolean paslibre = true;
-		//initialisation des textes avec les informations de la reservation
+		
+		this.reserv = reserv;
+		
 		this.lblReserv.setText(String.valueOf(reserv.getNumero_reservation()));
 		
 		this.lblnom.setText(reserv.getReserve().getNom());
 		this.lblpren.setText(reserv.getReserve().getPrenom());
 		this.lblNumTel.setText(reserv.getReserve().getNumero_tel());
+		this.lblMail.setText(reserv.getReserve().getAdresseMail());
 		this.lblNbPer.setText(String.valueOf(reserv.getNb_personne()));
-		lblnumChambre.setText(String.valueOf(reserv.getListe_chambre().get(0).getNumChambre()));
-		lblPlace.setText(String.valueOf(reserv.getListe_chambre().get(0).getNbPlace()));
-		lblprice.setText(String.valueOf(reserv.getListe_chambre().get(0).getPrix()));
-		//parcours de tableau pour récupérer les informations de la liste de chambre de la réservation
-		for (int i = 0; i < reserv.getListe_chambre().size(); i++) {
-		    Chambre c = reserv.getListe_chambre().get(i);
-		  //le if ici sert à savoir si une chambre dans la liste est pas libre alors la reservation n'est pas libre du tout
-		    if (c.isEstLibre() == false) {
-		        paslibre = false;
-		    }
-			//les séparateurs avec un ";" entre chaque données
-			if (i >= 1) {
-				lblnumChambre.setText(lblnumChambre.getText()+";"+c.getNumChambre());
-				lblPlace.setText(lblPlace.getText()+";"+c.getNbPlace());
-		        lblprice.setText(lblprice.getText()+";"+c.getPrix());
-		    }
+		
+		int total = 0;
+		this.lblNuCh.setText(String.valueOf(reserv.getListe_chambre().get(0).getNumChambre()));
+		
+		for(int i = 1; i < reserv.getNb_chambre(); i++) {
+			this.lblNuCh.setText(this.lblNuCh.getText() + ";" + String.valueOf(reserv.getListe_chambre().get(i).getNumChambre()));
 		}
-		//hbox pour aligner les informations qui seront à modifier
-		this.hboxplace.getChildren().add(lblPlace);
-		this.hboxprix.getChildren().add(lblprice);
-		this.num_chambre.getChildren().add(lblnumChambre);
-				
-		this.estLibre = paslibre;
+		
+		for (Chambre c : reserv.getListe_chambre()) {
+			
+			total += c.getNbPlace();
+			this.lblPlace.setText(String.valueOf(total));
+		}
+		
+		this.lblprice.setText(String.valueOf(this.prix(reserv)));
 		
 		this.lblCh.setText(String.valueOf(reserv.getNb_chambre()));
 		
@@ -104,16 +107,87 @@ public class Recap extends Stage{
 		this.setResizable(false);
 		this.sizeToScene();
 		
-		bFermer.setOnAction(e -> this.close());
+		bFermer.setOnAction(e -> {
+			this.close();
+		});
+		
+		bModifier.setOnAction(e -> {
+			
+			if(!reserv.getEstValide()) {
+				Alert alert  = new Alert(AlertType.ERROR, "Impossible de modifer cette réservation car celle-ci n'est pas validée. Veuillez la validez puis réessayer.");
+                alert.showAndWait();
+			} else {
+				Main.afficheRecapModif(reserv);
+				this.close();
+			}
+		});
+		
+		this.bSupprimer.setOnAction(e -> {
+					
+					Alert confirmer = new Alert(AlertType.CONFIRMATION);
+					Alert annuler = new Alert(AlertType.INFORMATION);
+					Alert suppr = new Alert(AlertType.INFORMATION);
+		            confirmer.setTitle("Confirmation");
+		            confirmer.setHeaderText(null);
+		            confirmer.setContentText("Voulez-vous vraiment supprimer cette réservation ? Cette action est irréversible.");
+		            
+		            confirmer.showAndWait().ifPresent(response -> {
+		                if (response == ButtonType.OK && reserv.getEstValide()) {
+		                    confirmer.close();
+		                    AccesDonnees.reservations.remove(this.reserv);
+		    				Main.reloadRecherche();
+		    				suppr.setTitle("Suppression");
+		                    suppr.setHeaderText(null);
+		                    suppr.setContentText("La réservation a été supprimée.");
+		                    suppr.showAndWait();
+		    				this.close();
+		                    
+		                } else if (response == ButtonType.OK && !reserv.getEstValide()) {
+		                	Alert alert  = new Alert(AlertType.ERROR, "Impossible de supprimer cette réservation car celle-ci n'est pas validée. Veuillez la validez puis réessayer.");
+		                    alert.showAndWait();
+		                } else {
+		                	confirmer.close();
+		                	annuler.setTitle("Annulation");
+		                    annuler.setHeaderText(null);
+		                    annuler.setContentText("Vous avez annuler la suppression.");
+		                    annuler.showAndWait();
+		                }
+		            });
+			
+			
+		});
+		
+		this.bEnvoyer.setOnAction(e -> {
+			
+			Alert confirmer = new Alert(AlertType.CONFIRMATION);
+            confirmer.setTitle("Confirmation afficher le mail");
+            confirmer.setHeaderText(null);
+            confirmer.setContentText("Voulez-vous afficher le mail récapitulatif de cette réservation ?");
+            reserv.setEstValide(true);
+            
+            ButtonType oui = new ButtonType("Oui");
+            ButtonType non = new ButtonType("Non");
+            
+            confirmer.getButtonTypes().set(1, oui);
+            confirmer.getButtonTypes().set(0, non);
+            confirmer.showAndWait().ifPresent(response -> {
+                if (response == oui) {
+                    confirmer.close();
+                    Main.afficheCourrier(reserv);
+                } else {
+                	confirmer.close();
+                	Alert alert2 = new Alert(AlertType.INFORMATION, "La réservation a bien été validée");
+                    alert2.showAndWait();
+                }
+            });
+		});
 		
 		this.setScene(new Scene(creerContenu()));
 	}
 	
 	private Parent creerContenu() {
-		//pour retirer le numéro des semaines sur le calendrier
 		dateDebut.setShowWeekNumbers(false);
-		dateFin.setShowWeekNumbers(false); 
-		//C'est pour faire une séléction de date 
+		
 		final Callback<DatePicker, DateCell> dayCellFactory =
 			    new Callback<DatePicker, DateCell>() {
 			        @Override
@@ -142,27 +216,22 @@ public class Recap extends Stage{
 			});
 		
 		lblChLib.setTextFill(Color.RED);
-		//ajout des libelle et des textes ainsi que des hbox dans le gridpane
+		
 		root.addRow(0, lblnumReserv, lblReserv);
 		root.addRow(1, lblNom, lblnom);
 		root.addRow(2, lblPrenom, lblpren);
 		root.addRow(3, lblNum, lblNumTel);
-		root.addRow(4, lblNb, lblNbPer);
-		lblNumCh.setAlignment(Pos.CENTER);
-		root.addRow(5, lblNumCh, num_chambre);
-		root.addRow(6, lblnbCh, lblCh);
-		root.addRow(7, lbldateD, dateDebut);
-		root.addRow(8, lblChLib);
-		if(estLibre == true) {
-			lblChLib.setText("Chambre libre");
-			lblChLib.setTextFill(Color.GREEN);
-		}
-		root.addRow(9, lblnumPla, this.hboxplace);
-		root.addRow(10, lblprix, this.hboxprix);
+		root.addRow(4, lblAdresseMail, lblMail);
+		root.addRow(5, lblNb, lblNbPer);
+		root.addRow(6, lblNumCh, lblNuCh);
+		root.addRow(7, lblnbCh, lblCh);
+		root.addRow(8, lbldateD, dateDebut);
+		root.addRow(9, lblnumPla, lblPlace);
+		root.addRow(10, lblprix, lblprice);
 		
-		root.add(bModifier, 0, 11);
-		root.add(bFermer, 1, 11);
-		root.add(bEnvoyer, 1, 11);
+		root.add(new HBox(bModifier, bSupprimer), 0, 12);
+		root.add(bFermer, 1, 12);
+		root.add(bEnvoyer, 1, 12);
 		
 		GridPane.setHalignment(bFermer, HPos.RIGHT);
         GridPane.setValignment(bFermer, VPos.CENTER);
@@ -176,4 +245,29 @@ public class Recap extends Stage{
 		root.setStyle("-fx-font-size:13;");
 		return root;
 	}
+	
+	public double prix(Reservation r) {
+	    double prixTT = 0;
+	    double prixTTchambre = 0;
+	    long nbJours;
+	    
+	    this.dateD = reserv.getDate_debut();
+		this.dateF = reserv.getDate_fin();
+
+	    if (this.dateD != null && this.dateF != null) {
+	        nbJours = ChronoUnit.DAYS.between(this.dateD, this.dateF); // -1 pour avoir le nombre de nuits et non de jours
+	        //System.out.println("nb de jours : " + nbJours);
+
+	        for (Chambre c : r.getListe_chambre()) {
+	            prixTTchambre += c.getPrix() * nbJours;
+	        }
+
+	        prixTT = prixTTchambre + (r.getNb_personne() * nbJours);
+	    } else {
+	        //System.out.println("Les dates de début et de fin ne sont pas définies.");
+	    }
+
+	    return prixTT;
+	}
+
 }

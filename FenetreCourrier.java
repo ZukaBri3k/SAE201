@@ -16,28 +16,22 @@ public class FenetreCourrier extends Stage{
 	private Label texte;
 	private Label objet;
 	private Label monsieur;
-	private Label adresseMail;
+	private Label adresseMail ;
 	private Label cordial = new Label("Cordialement");
 	private Label signature = new Label("Hotel Le Cheval Blanc");
 	private Button fermer = new Button("Fermer");
 	private GridPane racine	= new GridPane();
 	
-	public FenetreCourrier(String adresseMail,String nom, int chambres,int personnes,String debut,String fin) {
+	public FenetreCourrier(Reservation r) {
 		this.setWidth(700);
 		this.setHeight(500);
 		
 		this.setResizable(false);
 		
-		this.monsieur = new Label("Bonjour Madame, Monsieur​
-2
-public class FenetreCourrier {
-3
-​
-4
-} " + nom +",");
+		this.monsieur = new Label("Bonjour Madame, Monsieur ​" + r.getReserve().getNom() +",");
 		this.objet = new Label("Objet : Réservation au Cheval Blanc");
-		this.texte =new Label("	Je me permet de vous confirmer le réservation de "+chambres+" chambre(s) \npour "+personnes+" personne(s) pour la période du "+debut+" au "+fin+".");
-		this.adresseMail = new Label("A "+adresseMail);
+		this.texte =new Label("	Je me permet de vous confirmer la réservation de "+r.getNb_chambre()+" chambre(s) \npour "+r.getNb_personne()+" personne(s) pour la période du "+r.getDate_debut()+" au "+r.getDate_fin()+".");
+		this.adresseMail = new Label("A "+r.getReserve().getAdresseMail());
 		this.setTitle("Email de Confirmation");
 		
 		Scene laScene = new Scene(creerContenu());

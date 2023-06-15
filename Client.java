@@ -4,13 +4,15 @@ public class Client{
 	private String nom;
 	private String prenom;
 	private String numero_tel;
-	
-	public Client(String nom, String prenom, String numero_tel) {
+	private String adresseMail;
+	public Client(String nom, String prenom, String numero_tel,String adresseMail) {
 		super();
 		this.nom = nom;
 		this.prenom = prenom;
 		this.numero_tel = numero_tel;
+		this.adresseMail = adresseMail;
 	}
+
 
 	@Override
 	public int hashCode() {
@@ -52,5 +54,12 @@ public class Client{
 
 	public void setNumero_tel(String numero_tel) {
 		this.numero_tel = numero_tel;
+	}
+	public String getAdresseMail() {
+		return adresseMail;
+	}
+
+	public void setAdresseMail(String adresseMail) {
+		this.adresseMail = adresseMail;
 	}
 }

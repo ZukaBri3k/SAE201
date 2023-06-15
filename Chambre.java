@@ -1,6 +1,12 @@
 import java.util.Objects;
 
 public class Chambre {
+	@Override
+	public String toString() {
+		return "Chambre [numChambre=" + numChambre + ", estLibre=" + estLibre + ", nbPlace=" + nbPlace + ", prix="
+				+ prix + "]";
+	}
+
 	private int numChambre;
 	private boolean estLibre;
 	private int nbPlace;

@@ -54,6 +54,9 @@ public class RecapModif extends Stage{
 	private Label lblnbCh = new Label("Nombre de chambre :");
 	private TextField txtCh = new TextField();
 	String nbChambre;
+	private Label lbladresseMail = new Label("Adresse mail :");
+	private TextField txtAdresseMail= new TextField();
+	String adresseMail;
 	
 	private Label lbldateD = new Label("Date d'arrivée :");
 	private Label lbldateF = new Label("Date de fin :");
@@ -71,7 +74,7 @@ public class RecapModif extends Stage{
 	String place;
 	
 	private Label lblprix = new Label("Prix :");
-	private Label txtprice= new Label();
+	private TextField txtprice= new TextField();
 	
 	private Button bFermer = new Button("Fermer");
 	private Button bEnvoyer = new Button("Valider");
@@ -90,6 +93,65 @@ public class RecapModif extends Stage{
 	public RecapModif(Reservation reserv){
 		boolean paslibre = true;
 		
+		cbChambre.setOnAction(e -> {
+			if(cbChambre.getSelectionModel().getSelectedItem().equals("Libre")) {
+				lblChLib.setText("Chambre libre");
+				lblChLib.setTextFill(Color.GREEN);
+			} else {
+				lblChLib.setText("Chambre non libre");
+				lblChLib.setTextFill(Color.RED);
+			}
+		});
+		
+		this.setTitle("Récapitulatif de la réservation");
+		this.setResizable(false);
+		this.sizeToScene();
+		
+		bFermer.setOnAction(e -> {
+			this.close();
+			Main.afficheRecap(reserv);
+		});
+		
+		bEnvoyer.setOnAction(e -> {
+			String[] numsChambre = txtnumChambre.getText().split(";");
+			String[] placesChambre = txtPlace.getText().split(";");
+			String[] prixChambres = txtprice.getText().split(";");
+			
+			if(!this.txtAdresseMail.getText().matches("(.+)@(.+)")) {
+				Alert alert = new Alert(AlertType.ERROR, "Le mail renseigné doit être valide", ButtonType.OK);
+				alert.setTitle("Erreur lors de la saisie du mail");
+				alert.showAndWait();
+			} else {
+				if(numsChambre.length == placesChambre.length && placesChambre.length == prixChambres.length) {
+					
+					if (txtnumChambre.getText().endsWith(";")) {
+						txtnumChambre.deletePreviousChar();
+					}
+					if (txtnumChambre.getText().endsWith(";")) {
+						txtnumChambre.deletePreviousChar();
+					}
+					
+					Reservation nouvReser = new Reservation(dateD, dateF, Integer.valueOf(txtNbPer.getText()), new Client(txtnom.getText(), txtpren.getText(), txtNumTel.getText(),txtAdresseMail.getText()), new Chambre(Integer.valueOf(numsChambre[0]), true, Integer.valueOf(placesChambre[0]), Double.valueOf(prixChambres[0])));
+					
+					for(int i = 1; i < numsChambre.length; i++) {
+						nouvReser.addChambre(new Chambre(Integer.parseInt(numsChambre[i]), true, Integer.parseInt(placesChambre[i]), Double.valueOf(prixChambres[i])));
+					}
+					nouvReser.setNumero_reservation(Integer.parseInt(this.txtReserv.getText()));
+					nouvReser.setNb_chambre(numsChambre.length);
+					AccesDonnees.reservations.remove(reserv);
+					AccesDonnees.reservations.add(nouvReser);
+					this.close();
+					Main.reloadRecherche();
+					Main.afficheRecap(nouvReser);
+				} else {
+					Alert alert = new Alert(AlertType.ERROR, "Il n'y a pas le même nombre de prix, de place, et de numéro de chambre. Essayez en rajoutant ou en enlevant un attribut.");
+					alert.setTitle("Erreur lors de la modification");
+					alert.setHeaderText("Une erreur est survenue lors de la modification.");
+					alert.showAndWait();
+				}
+			}
+		});
+
 		
 		//initialisation des textes avec les informations de la reservation avec les contraintes aussi
 		
@@ -242,7 +304,7 @@ public class RecapModif extends Stage{
 				txtCh.deletePreviousChar();
 			}
 		});
-		
+		this.txtAdresseMail.setText(reserv.getReserve().getAdresseMail());
 		
 		this.dateD = reserv.getDate_debut();
 		this.dateF = reserv.getDate_fin();
@@ -251,32 +313,15 @@ public class RecapModif extends Stage{
 		dateDebut.setTooltip(new Tooltip("Format dd/mm/yyyy, pas de lettres."));
 		dateFin.setTooltip(new Tooltip("Format dd/mm/yyyy, pas de lettres."));
 		
-		//Combobox, pour 
-		cbChambre.getItems().addAll(
-				"Libre", 
-				"Pas libre"
-				);
-		if(paslibre == false) {
-			cbChambre.setValue("Pas libre");
-		} else {
-			cbChambre.setValue("Libre");
-		}
-		cbChambre.setOnAction(e -> {
-			if(cbChambre.getSelectionModel().getSelectedItem().equals("Libre")) {
-				lblChLib.setText("Chambre libre");
-				lblChLib.setTextFill(Color.GREEN);
-			} else {
-				lblChLib.setText("Chambre non libre");
-				lblChLib.setTextFill(Color.RED);
-			}
-		});
-		
 		
 		this.setTitle("Récapitulatif de la réservation");
 		this.setResizable(false);
 		this.sizeToScene();
 		
-		bFermer.setOnAction(e -> this.close());
+		bFermer.setOnAction(e -> {
+			this.close();
+			Main.afficheRecap(reserv);
+		});
 		
 		this.setScene(new Scene(creerContenu()));
 	}
@@ -295,31 +340,34 @@ public class RecapModif extends Stage{
 		root.addRow(1, lblNom, txtnom);
 		root.addRow(2, lblPrenom, txtpren);
 		root.addRow(3, lblNum, txtNumTel);
-		root.addRow(4, lblNb, txtNbPer);
+		root.addRow(4, lbladresseMail, txtAdresseMail);
+		root.addRow(5, lblNb, txtNbPer);
 		lblNumCh.setAlignment(Pos.TOP_CENTER);
-		root.addRow(5, lblNumCh, num_chambre);
-		root.addRow(6, lblnbCh, txtCh);
-		root.addRow(7, lbldateD, dateDebut);
-		root.addRow(8, lbldateF, dateFin);
+		root.addRow(6, lblNumCh, num_chambre);
+		root.addRow(7, lblnbCh, txtCh);
+		txtCh.setDisable(true);
+		root.addRow(8, lbldateD, dateDebut);
+		root.addRow(9, lbldateF, dateFin);
 		
-		root.addRow(9, lblChLib, cbChambre);
+		/*root.addRow(9, lblChLib, cbChambre);
 		if(estLibre == true) {
 			lblChLib.setText("Chambre libre");
 			lblChLib.setTextFill(Color.GREEN);
-		}
+		}*/
 		root.addRow(10, lblnumPla, hboxplace);
 		root.addRow(11, lblprix, hboxprix);
 		
 		
 		root.add(bFermer, 1, 12);
 		root.add(bEnvoyer, 0, 12);
+		//root.addRow(12, new Label(""));
 		
 		GridPane.setHalignment(bFermer, HPos.RIGHT);
         GridPane.setValignment(bFermer, VPos.CENTER);
 		
 		root.setHgap(10);
 		root.setVgap(10);
-		root.setPadding(new Insets(10));
+		root.setPadding(new Insets(10, 10, 20, 10));
 		
 		root.setStyle("-fx-font-size:13;");
 		return root;
