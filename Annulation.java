@@ -1,3 +1,4 @@
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -8,7 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class Annulation extends Application {
@@ -17,6 +17,8 @@ public class Annulation extends Application {
     private BorderPane root = new BorderPane();
     private Button boutonSup = new Button("Supprimer");
     private Alert confirmer = new Alert(AlertType.CONFIRMATION);
+    private Alert suppr = new Alert(AlertType.INFORMATION);
+    private Alert annuler = new Alert(AlertType.INFORMATION);
     private Label texte = new Label ("Réservation n°21548\n"
             + "Nom : Lebeau\n"
             + "Du 14/06/2023 au 19/06/2023\n"
@@ -39,16 +41,33 @@ public class Annulation extends Application {
         boutonSup.setOnAction(e -> {
             confirmer.setTitle("Confirmation");
             confirmer.setHeaderText(null);
-            confirmer.setContentText("Voulez-vous vraiment supprimer cette réservation ? Cette action est irréversible.");
+            confirmer.setContentText("Voulez-vous vraiment supprimer cette réservation? Cette action est irréversible.");
             
             confirmer.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    confirmer.close();
+            	if (response == ButtonType.OK) {
+            		confirmer.close();
                     this.primaryStage.close();
-                    ConfirmationPage();
+                   
+                    suppr.setTitle("Suppression");
+                    suppr.setHeaderText(null);
+                    suppr.setContentText("La réservation a été supprimée.");
+                        
+                    suppr.showAndWait().ifPresent(ok -> {
+                    	suppr.close();
+
+                 });
                 } else {
                 	confirmer.close();
-                    NonConfirmationPage();
+
+                    this.primaryStage.close();
+                        
+                    annuler.setTitle("Annulation");
+                    annuler.setHeaderText(null);
+                    annuler.setContentText("Vous avez annuler la suppression.");
+                             
+                    annuler.showAndWait().ifPresent(ok -> {
+                                annuler.close();
+                      });
                 }
             });
         });
@@ -62,25 +81,6 @@ public class Annulation extends Application {
         this.primaryStage.show();
     }
 
-    private void ConfirmationPage() {
-    	Stage confirmationStage = new Stage();
-        VBox confirmationRoot = new VBox();
-        Label confirmationLabel = new Label("La réservation a été supprimée.");
-        confirmationRoot.getChildren().add(confirmationLabel);
-        Scene confirmationScene = new Scene(confirmationRoot, 400, 300);
-        confirmationStage.setScene(confirmationScene);
-        confirmationStage.show();
-    }
-    
-    private void NonConfirmationPage() {
-    	Stage confirmationStage = new Stage();
-        VBox confirmationRoot = new VBox();
-        Label confirmationLabel = new Label("Vous avez annuler la suppression.");
-        confirmationRoot.getChildren().add(confirmationLabel);
-        Scene confirmationScene = new Scene(confirmationRoot, 400, 300);
-        confirmationStage.setScene(confirmationScene);
-        confirmationStage.show();
-    }
     
     public static void main(String[] args) {
         Application.launch(args);
